@@ -1,0 +1,65 @@
+--회원테이블(오라클)
+CREATE TABLE users (
+    id VARCHAR2(30) not null,
+    pw VARCHAR2(30) not null,
+    name VARCHAR2(30) not null,
+    email VARCHAR2(30),
+    address VARCHAR2(100),
+    regdate DATE DEFAULT sysdate
+);
+ALTER TABLE users add CONSTRAINT users_pk PRIMARY KEY (id);
+
+
+--게시글 테이블
+CREATE TABLE board (
+    bno NUMBER(10,0) not null,
+    title VARCHAR2(300) not null,
+    writer VARCHAR2(25) not null,
+    content VARCHAR2(2000),
+    ragdate DATE DEFAULT SYSDATE,
+    hit NUMBER(10,0) DEFAULT 0
+
+);
+
+alter table board add constraint board_pk PRIMARY KEY (bno);
+
+CREATE SEQUENCE board_seq START with 1 INCREMENT by 1 NOCACHE;
+
+
+--임시게시글 반복문으로 작성
+
+DECLARE
+    var1 NUMBER := 1;
+BEGIN
+    WHILE var1 <= 300
+    loop
+        insert into board(bno, writer, title, content) values(BOARD_SEQ.nextval, 'test', 'test', 'test');
+        insert into board(bno, writer, title, content) values(BOARD_SEQ.nextval, 'admin', 'admin', 'admin');
+        insert into board(bno, writer, title, content) values(BOARD_SEQ.nextval, 'test02', 'test02', 'test02');
+        
+        var1 := var1 + 1;  
+          
+    end loop;
+    COMMIT;
+    
+end;
+
+--페이징 sql
+--인라인 뷰
+--1. 가장 안쪽 셀렉트구문에서 정렬해서 조회
+--2. rownum을 구해서 조회
+--3. rownum로 조건절
+
+
+select * 
+from(select rownum rn,
+            bno,
+            writer,
+            title,
+            content,
+            regdate,
+            hit
+    from( SELECT * 
+          FROM board 
+          ORDER BY bno desc)
+) where rn <= 10 and rn <= 20;
